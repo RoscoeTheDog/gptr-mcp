@@ -287,8 +287,8 @@ def run_server():
     
     # Add startup message
     logger.info(f"Starting GPT Researcher MCP Server with {transport} transport...")
-    print(f"🚀 GPT Researcher MCP Server starting with {transport} transport...")
-    print("   Check researcher_mcp_server.log for details")
+    # Note: Cannot use print() with stdio transport - stdout is reserved for MCP protocol
+    # Logging to stderr via logger is OK
 
     # Let FastMCP handle the event loop
     try:
@@ -308,10 +308,9 @@ def run_server():
             pass  # Keep the process alive
     except Exception as e:
         logger.error(f"Error running MCP server: {str(e)}")
-        print(f"❌ MCP Server error: {str(e)}")
         return
-        
-    print("✅ MCP Server stopped")
+
+    logger.info("MCP Server stopped")
 
 
 if __name__ == "__main__":
