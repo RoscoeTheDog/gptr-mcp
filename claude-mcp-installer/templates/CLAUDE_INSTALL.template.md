@@ -1,8 +1,12 @@
-# gptr-mcp - Installation Guide
+# [PROJECT_NAME] - Installation Guide
 
-**Version**: 1.0.0 | **Updated**: 2025-10-26 | **For**: AI-assisted + manual install
+> **⚠️ TEMPLATE FILE**: Platform-agnostic generator (templates/)
+> **Generated**: `instance/CLAUDE_INSTALL.md` (platform-specific, gitignored)
+> **Agent**: Read `claude-mcp-installer/CLAUDE_README.md` first → Copy to instance/ → Populate placeholders
 
----
+**Version**: 1.0.0 | **Updated**: [DATE] | **For**: AI-assisted + manual install
+
+
 
 ## TOC
 
@@ -13,12 +17,35 @@
 ## Overview
 
 **About**:
-- Base: GPT Researcher MCP Server
-- Base Repo: `https://github.com/assafelovic/gptr-mcp.git`
-- This Repo: `https://github.com/RoscoeTheDog/gptr-mcp.git`
-- Custom: Added custom tools, modified configuration, enhanced documentation
+- Base: [BASE_PROJECT_NAME] (if derived)
+- Base Repo: `[BASE_REPO_URL]` (if applicable)
+- This Repo: `[YOUR_REPO_URL]`
+- Custom: [brief customizations]
 
-**Philosophy**: Multi-path install, explicit choices (AI always prompts), platform-specific, validation-tracked
+**Philosophy**: Multi-path install, explicit choices (AI always prompts), platform-specific, validation-tracked, non-intrusive (user confirms all system changes)
+
+**AI Installation Policy** (P7: Non-Intrusive Installation):
+- ✅ **Agent ALWAYS prompts** before system/environment changes
+- ✅ **User explicitly confirms** package installs, global config, system services
+- ✅ **Transparent operations** - agent explains scope, impact, reversibility
+- ✅ **Project-local changes** (venv, .env, project files) - OK without prompt
+- ❌ **NEVER auto-install** packages or modify system without approval
+
+**What Requires Confirmation**:
+```
+System Changes (PROMPT REQUIRED):
+├─ Package installation (pip, npm, apt, brew)
+├─ Global environment variables (system-wide)
+├─ Service installation (databases, runtimes)
+├─ MCP server registration (global Claude Code config)
+└─ PATH modifications, registry edits
+
+Project Changes (NO PROMPT NEEDED):
+├─ .env file creation/editing (project-local)
+├─ Virtual environment setup (project-local)
+├─ Installing deps in active venv (project-scoped)
+└─ Config files within project directory
+```
 
 ---
 
@@ -26,14 +53,14 @@
 
 ### Required
 
-#### Python 3.11+ ✅W11
-- **Reason**: gptr-mcp requires Python 3.11 or higher (gpt-researcher >=0.12.16 requirement)
-- **Validation**: ✅W11 [2025-10-26]
+#### Python [PYTHON_VERSION]+ ✅WML
+- **Reason**: [PROJECT_NAME] requires Python [PYTHON_VERSION]+
+- **Validation**: ✅W11, ✅M14, ✅U22.04
 - **Install**:
   - W: [python.org](https://python.org/downloads/)
-  - M: `brew install python@3.11`
-  - L: `sudo apt install python3.11 python3.11-venv`
-- **Verify**: `python --version` (should show 3.11+)
+  - M: `brew install python@[PYTHON_VERSION]`
+  - L: `sudo apt install python[PYTHON_VERSION] python[PYTHON_VERSION]-venv`
+- **Verify**: `python --version` (should show [PYTHON_VERSION]+)
 
 #### Git ✅WML
 - **Install**:
@@ -43,44 +70,41 @@
 
 ### Optional
 
-#### Anthropic API Key ⚠️
-- **Reason**: For using Claude models instead of OpenAI
-- **Required-For**: Claude-based research and report generation
-- **Validation**: ⚠️ Experimental (optional feature)
+#### [OPTIONAL_DEP] ⚠️
+- **Reason**: [why needed]
+- **Required-For**: [specific features]
+- **Validation**: ⚠️ Needs testing
 
 ---
 
 ## Installation Options
 
-### Standard Installation (pip)
+Wizard-style: Choose per component. Agent prompts, never assumes.
 
-**Recommended**: Simple pip-based installation
+### Database Setup
 
-#### Python Virtual Environment ✅W11
-- **Best**: Isolated dependencies, clean setup
-- **Pros**: No conflicts with system packages, easy cleanup
-- **Cons**: Need to activate venv for each session
+**Prompt**: "Which database method?"
+
+#### Opt1: [DATABASE] Cloud ✅W11+M14
+- **Best**: Quick, no local install
+- **Pros**: Managed, no maintenance, remote-access
+- **Cons**: Internet required, cost-after-free-tier
 - **Time**: 5-10min
-- **Validation**: ✅W11 [2025-10-26]
+- **Validation**: ✅W11, ✅M14
 
-**Steps**:
-```bash
-# Clone repository
-git clone https://github.com/RoscoeTheDog/gptr-mcp.git
-cd gptr-mcp
+#### Opt2: [DATABASE] Local ⚠️
+- **Best**: Offline dev, full control
+- **Pros**: No internet, free, full-control
+- **Cons**: Local install + maintenance
+- **Time**: 15-30min
+- **Validation**: ⚠️ Needs validation
 
-# Create virtual environment
-python -m venv venv
-
-# Activate (Windows)
-.\venv\Scripts\activate
-
-# Activate (macOS/Linux)
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
+#### Opt3: [DATABASE] Docker ✅WML
+- **Best**: Isolated env, easy cleanup
+- **Pros**: Containerized, reproducible, easy-reset
+- **Cons**: Docker required
+- **Time**: 10-15min
+- **Validation**: ✅ All platforms
 
 ---
 
@@ -107,7 +131,7 @@ pip install -r requirements.txt
 **Automatic Detection**:
 ```bash
 # Agent runs:
-claude mcp list | grep gptr-mcp
+claude mcp list | grep [MCP_SERVER_NAME]
 ```
 
 **Possible States**:
@@ -125,11 +149,10 @@ claude mcp list | grep gptr-mcp
 │ MCP Server Installation Wizard             │
 ├─────────────────────────────────────────────┤
 │                                             │
-│ ✓ Found: gptr-mcp (User scope)             │
+│ ✓ Found: [MCP_SERVER_NAME] (User scope)   │
 │   Status: Connected                         │
-│   Command: C:\python313\python.exe          │
-│   Entrypoint: C:\Users\Admin\Documents\     │
-│               GitHub\gptr-mcp\server.py     │
+│   Command: [current-command]                │
+│   Entrypoint: [current-entrypoint]          │
 │                                             │
 │ What would you like to do?                  │
 │                                             │
@@ -166,16 +189,11 @@ claude mcp list | grep gptr-mcp
 **Detected Credentials**:
 ```
 Required:
-- OPENAI_API_KEY: OpenAI API key for GPT models
-- TAVILY_API_KEY: Tavily API key for web search
+- [CREDENTIAL_1]: [description-from-readme]
+- [CREDENTIAL_2]: [description-from-readme]
 
 Optional:
-- ANTHROPIC_API_KEY: Anthropic API key for Claude models (optional)
-- EMBEDDING: Embedding model configuration (default: openai:text-embedding-3-small)
-- STRATEGIC_LLM: LLM for strategic research (default: openai:gpt-4o-mini)
-- MAX_ITERATIONS: Maximum research iterations (default: 2)
-- LOG_LEVEL: Server logging level (default: INFO)
-- PORT: Server port (default: 8000)
+- [OPTIONAL_CREDENTIAL_1]: [description-from-readme]
 ```
 
 **System Environment Check**:
@@ -194,9 +212,9 @@ echo $CREDENTIAL
 
 **Results**:
 ```
-✓ OPENAI_API_KEY: Found in system environment
-✗ TAVILY_API_KEY: Not found in system environment
-✗ ANTHROPIC_API_KEY: Not found (optional)
+✓ [CREDENTIAL_1]: Found in system environment
+✗ [CREDENTIAL_2]: Not found in system environment
+✗ [OPTIONAL_CREDENTIAL_1]: Not found (optional)
 ```
 
 **Credential Elicitation**:
@@ -297,15 +315,38 @@ Agent automatically detects:
 - **Server Name**: From README, directory name, or package metadata
 
 **Command Generated**:
+
+**Agent Workflow** (P7: Non-Intrusive Installation):
+```
+Agent: "About to add MCP server to global Claude Code configuration:
+
+        Command: claude mcp add-json --scope user [MCP_SERVER_NAME]
+        Scope: User-wide (available in all your projects)
+        Location: ~/.claude.json
+
+        Configuration:
+        - Runtime: [ABSOLUTE_RUNTIME_PATH]
+        - Entrypoint: [ABSOLUTE_ENTRYPOINT_PATH]
+        - Credentials: [list of credential names - values masked]
+
+        This is a SYSTEM CHANGE (modifies global config).
+
+        Proceed? [Y/N]"
+
+User: "Y"
+
+Agent: [Executes command below]
+```
+
 ```bash
-claude mcp add-json --scope user gptr-mcp '{
+claude mcp add-json --scope user [MCP_SERVER_NAME] '{
   "type":"stdio",
-  "command":"C:\\python313\\python.exe",
-  "args":["C:\\Users\\Admin\\Documents\\GitHub\\gptr-mcp\\server.py"],
+  "command":"[ABSOLUTE_RUNTIME_PATH]",
+  "args":["[ABSOLUTE_ENTRYPOINT_PATH]"],
   "env":{
-    "OPENAI_API_KEY":"[your-openai-key]",
-    "TAVILY_API_KEY":"[your-tavily-key]",
-    "ANTHROPIC_API_KEY":"[your-anthropic-key-optional]"
+    "[CREDENTIAL_1]":"[actual-value]",
+    "[CREDENTIAL_2]":"[actual-value]",
+    "[OPTIONAL_CREDENTIAL_1]":"[actual-value-or-omitted]"
   }
 }'
 ```
@@ -338,22 +379,21 @@ claude mcp add-json --scope user gptr-mcp '{
 claude mcp list
 
 # Should show:
-gptr-mcp: ✓ Connected (User scope)
+[MCP_SERVER_NAME]: ✓ Connected (User scope)
 
 # Get detailed configuration
-claude mcp get gptr-mcp
+claude mcp get [MCP_SERVER_NAME]
 
 # Should show:
-gptr-mcp:
+[MCP_SERVER_NAME]:
   Scope: User config (available in all your projects)
   Status: ✓ Connected
   Type: stdio
-  Command: C:\python313\python.exe
-  Args: C:\Users\Admin\Documents\GitHub\gptr-mcp\server.py
+  Command: [runtime-path]
+  Args: [entrypoint-path]
   Environment:
-    OPENAI_API_KEY: sk-****...****
-    TAVILY_API_KEY: tvly-****...****
-    ANTHROPIC_API_KEY: sk-ant-****...****
+    [CREDENTIAL_1]: [masked-value]
+    [CREDENTIAL_2]: [masked-value]
 ```
 
 **Test in Claude Code CLI**:
@@ -365,7 +405,7 @@ claude
 # Check MCP servers
 /mcp
 
-# Should list gptr-mcp with available tools
+# Should list [MCP_SERVER_NAME] with available tools
 ```
 
 #### Phase 5: Post-Installation
@@ -375,25 +415,20 @@ claude
 ✅ Installation complete!
 
 Summary:
-- Server: gptr-mcp
+- Server: [MCP_SERVER_NAME]
 - Scope: User (global)
 - Status: Connected
-- Credentials configured: OPENAI_API_KEY, TAVILY_API_KEY, ANTHROPIC_API_KEY
+- Credentials configured: [list]
 
 Next steps:
 1. ✅ Restart Claude Code CLI (if running)
 2. ✅ Run '/mcp' to see available MCP servers
-3. ✅ Test tools: deep_research, quick_search, write_report
+3. ✅ Test tools: [list-of-available-tools]
 
 Available tools:
-- deep_research: Performs deep web research on a topic (30s-5min, comprehensive)
-- quick_search: Fast web search optimized for speed (5-30s, quick results)
-- write_report: Generate research reports from collected data
-- get_research_sources: Retrieve sources used in research
-- get_research_context: Get full context of completed research
-
-Available prompts:
-- research_query: Create structured research query prompts
+- [tool-1]: [description]
+- [tool-2]: [description]
+- [tool-3]: [description]
 ```
 
 **For Update**:
@@ -401,9 +436,8 @@ Available prompts:
 ✅ Configuration updated!
 
 Changes:
-- OPENAI_API_KEY: Updated
-- TAVILY_API_KEY: Unchanged
-- ANTHROPIC_API_KEY: Updated
+- [CREDENTIAL_1]: Updated
+- [CREDENTIAL_2]: Unchanged
 
 Restart Claude Code CLI to apply changes:
 > exit
@@ -415,9 +449,8 @@ Restart Claude Code CLI to apply changes:
 ✅ Installation repaired!
 
 Issues fixed:
-- Runtime path verified: C:\python313\python.exe exists
-- Entrypoint verified: C:\Users\Admin\Documents\GitHub\gptr-mcp\server.py exists
-- Credentials validated: All API keys confirmed
+- [issue-1]: [resolution]
+- [issue-2]: [resolution]
 
 Status: Connected
 ```
@@ -426,22 +459,22 @@ Status: Connected
 
 #### Issue: Server not appearing in `/mcp` list
 
-**Symptoms**: `/mcp` command doesn't show gptr-mcp
+**Symptoms**: `/mcp` command doesn't show [MCP_SERVER_NAME]
 
 **Diagnosis**:
 ```bash
 # Check if server is registered
-claude mcp list | grep gptr-mcp
+claude mcp list | grep [MCP_SERVER_NAME]
 
 # If found, check details
-claude mcp get gptr-mcp
+claude mcp get [MCP_SERVER_NAME]
 ```
 
 **Solutions**:
 1. **Not in list at all** → Run installation again
 2. **Project scope (local)** → Migrate to user scope:
    ```bash
-   claude mcp remove gptr-mcp -s local
+   claude mcp remove [MCP_SERVER_NAME] -s local
    # Then re-run installation with --scope user
    ```
 3. **Status: Disconnected** → See "Connection failed" issue below
@@ -453,20 +486,26 @@ claude mcp get gptr-mcp
 **Diagnosis**:
 ```bash
 # Verify runtime exists
-C:\python313\python.exe --version
+[runtime-command] --version
 
 # Example (Python):
 python --version
 C:\python313\python.exe --version
 
 # Verify entrypoint exists
-ls C:\Users\Admin\Documents\GitHub\gptr-mcp\server.py
+ls [entrypoint-path]
+
+# Example:
+ls C:\Users\Admin\Documents\GitHub\[project]\server.py
 
 # Check debug logs
-tail -f ~/.claude/debug/*.txt | grep gptr-mcp
+tail -f ~/.claude/debug/*.txt | grep [MCP_SERVER_NAME]
 
 # Test server manually
-C:\python313\python.exe C:\Users\Admin\Documents\GitHub\gptr-mcp\server.py
+[runtime-command] [entrypoint-path]
+
+# Example (Python):
+python C:\Users\Admin\Documents\GitHub\[project]\server.py
 # Should start without errors (Ctrl+C to stop)
 ```
 
@@ -514,13 +553,11 @@ C:\python313\python.exe C:\Users\Admin\Documents\GitHub\gptr-mcp\server.py
 **Verification**:
 ```bash
 # Check stored credentials (masked)
-claude mcp get gptr-mcp
+claude mcp get [MCP_SERVER_NAME]
 
 # Shows:
 Environment:
-  OPENAI_API_KEY: sk-****...****
-  TAVILY_API_KEY: tvly-****...****
-  ANTHROPIC_API_KEY: sk-ant-****...****
+  [CREDENTIAL]: [masked-value]
 ```
 
 **Solution**:
@@ -568,22 +605,21 @@ claude mcp get [MCP_SERVER_NAME]
 **Method 2: Manual Update**:
 ```bash
 # Step 1: Remove existing configuration
-claude mcp remove gptr-mcp
+claude mcp remove [MCP_SERVER_NAME]
 
 # Step 2: Re-add with new credentials
-claude mcp add-json --scope user gptr-mcp '{
+claude mcp add-json --scope user [MCP_SERVER_NAME] '{
   "type":"stdio",
-  "command":"C:\\python313\\python.exe",
-  "args":["C:\\Users\\Admin\\Documents\\GitHub\\gptr-mcp\\server.py"],
+  "command":"[runtime-path]",
+  "args":["[entrypoint-path]"],
   "env":{
-    "OPENAI_API_KEY":"[new-value]",
-    "TAVILY_API_KEY":"[new-value]",
-    "ANTHROPIC_API_KEY":"[new-value-optional]"
+    "[CREDENTIAL_1]":"[new-value]",
+    "[CREDENTIAL_2]":"[new-value]"
   }
 }'
 
 # Step 3: Verify
-claude mcp get gptr-mcp
+claude mcp get [MCP_SERVER_NAME]
 
 # Step 4: Restart Claude Code CLI
 exit
@@ -621,8 +657,8 @@ claude
 ### S1: Clone
 
 ```bash
-git clone https://github.com/RoscoeTheDog/gptr-mcp.git
-cd gptr-mcp
+git clone [YOUR_REPO_URL]
+cd [project-directory]
 ```
 
 ### S2: Virtual Environment
@@ -642,35 +678,94 @@ which python                 # macOS/Linux
 
 ### S3: Dependencies
 
+**Agent Workflow** (P7: Non-Intrusive Installation):
+```
+Agent: "I need to install dependencies from requirements.txt:
+        [Lists packages and versions from requirements.txt]
+
+        This will run: pip install -r requirements.txt
+        Scope: Project-local (in your active virtual environment)
+        Impact: Adds packages to venv only (not system-wide)
+
+        Proceed? [Y/N]"
+
+User: "Y"
+
+Agent: [Executes installation]
+```
+
+**Manual Installation**:
 ```bash
 pip install -r requirements.txt
 ```
 
-### S4: API Keys Setup
+### S4: Database (Interactive)
 
-Configure required API keys for web search and LLM operations.
+**Prompt**: "Which method?" (see [Options](#installation-options))
 
-#### OpenAI API Key (Required) ✅W11
-1. Visit [https://platform.openai.com/api-keys](https://platform.openai.com/api-keys)
-2. Sign up/login to OpenAI account
-3. Click "Create new secret key"
-4. Copy key (starts with `sk-proj-` or `sk-`)
-5. Store securely (can't view again)
+#### If Opt1: Cloud
 
-#### Tavily API Key (Required) ✅W11
-1. Visit [https://app.tavily.com](https://app.tavily.com)
-2. Sign up/login to Tavily account
-3. Navigate to API keys section
-4. Create new API key
-5. Copy key (starts with `tvly-`)
+1. **Account**: Visit [CLOUD_URL], sign up, create instance
+2. **Connection**: Copy URI (`neo4j+s://xxx.databases.neo4j.io`), username (`neo4j`), password
+3. **Env** (see [Environment](#environment-configuration)):
+   ```bash
+   DATABASE_URI=neo4j+s://xxx.databases.neo4j.io
+   DATABASE_USER=neo4j
+   DATABASE_PASSWORD=your_password
+   ```
 
-#### Anthropic API Key (Optional) ⚠️
-- **For**: Using Claude models instead of OpenAI
-- **Setup**:
-  1. Visit [https://console.anthropic.com](https://console.anthropic.com)
-  2. Sign up/login
-  3. Create API key
-  4. Copy key (starts with `sk-ant-`)
+#### If Opt2: Local
+
+**W**:
+1. Download installer from [URL]
+2. Run, choose "Windows Service"
+3. Set admin password
+4. Verify: `sc query [SERVICE]`
+5. Env: `DATABASE_URI=bolt://localhost:7687`, user/pass as set
+
+**M**:
+```bash
+brew install [DATABASE]
+brew services start [DATABASE]
+# Env same as Windows local
+```
+
+**L**:
+```bash
+[LINUX_INSTALL_COMMANDS]
+# Env same as Windows local
+```
+
+#### If Opt3: Docker
+
+```bash
+docker run -d \
+  --name [PROJECT]-db \
+  -p 7687:7687 -p 7474:7474 \
+  -e [DATABASE]_AUTH=[DATABASE]/your_password \
+  [DATABASE_DOCKER_IMAGE]
+
+# Env
+DATABASE_URI=bolt://localhost:7687
+DATABASE_USER=[DATABASE]
+DATABASE_PASSWORD=your_password
+```
+
+### S5: API Keys (Interactive)
+
+**Prompt**: "Which LLM provider?"
+
+#### [LLM_PROVIDER_1] ✅WML
+1. Visit [PROVIDER_URL], sign up/login, create API key
+2. Env: `[PROVIDER_1]_API_KEY=sk-xxxxx`
+
+#### [LLM_PROVIDER_2] ⚠️
+- Same process
+- Env: `[PROVIDER_2]_API_KEY=xxxxx`
+
+#### Optional: [OPTIONAL_SERVICE]
+- **For**: [feature]
+- **Setup**: [instructions]
 
 ---
 
@@ -756,10 +851,10 @@ python -c "from [MODULE] import llm; llm.test_api()"
 ## Next Steps
 
 After install:
-1. **Docs**: https://docs.gptr.dev/docs/gpt-researcher/mcp-server/getting-started
-2. **Official Website**: https://gptr.dev
-3. **Community**: https://discord.gg/QgZXvJAccX
-4. **Base Project**: https://github.com/assafelovic/gpt-researcher
+1. **Docs**: [DOCS_URL]
+2. **Examples**: `examples/` directory
+3. **Community**: [DISCORD_URL]
+4. **Contribute**: CONTRIBUTING.md
 
 ### For Devs
 
@@ -777,10 +872,10 @@ See [CLAUDE_INSTALL_CHANGELOG.md](./CLAUDE_INSTALL_CHANGELOG.md)
 
 ## Support
 
-- Issues: https://github.com/RoscoeTheDog/gptr-mcp/issues
-- Discussions: https://github.com/RoscoeTheDog/gptr-mcp/discussions
-- Base Project: https://github.com/assafelovic/gptr-mcp
+- Issues: `[REPO_URL]/issues`
+- Discussions: `[REPO_URL]/discussions`
+- Base: `[BASE_REPO_URL]` (if derived)
 
 ---
 
-**Template**: v1.1.0 | **Guide**: v1.0.0
+**Template**: v1.3.0 | **Guide**: v1.0.0

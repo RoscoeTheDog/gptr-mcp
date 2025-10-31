@@ -1,5 +1,10 @@
-# CLAUDE_MCP_TEMPLATE.md - MCP Server Integration Reference
+# CLAUDE_MCP_INTEGRATION_SCHEMA.ref.md - MCP Server Integration Reference
 
+> **⚠️ STATIC REFERENCE**: Read-only resource (references/)
+> **Purpose**: Reference guide for MCP server integration patterns
+> **Agent**: Use as context when populating instance/CLAUDE_INSTALL.md - NEVER copy this file
+
+**Version**: 1.0.0 | **Created**: 2025-10-26 | **Purpose**: Reference guide for MCP server integration patterns
 **Version**: 1.0.0 | **Created**: 2025-10-26 | **Purpose**: Reference guide for MCP server integration patterns
 
 ---

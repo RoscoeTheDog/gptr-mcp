@@ -1,6 +1,65 @@
-# CLAUDE_MIGRATE.md - Template Migration
+# CLAUDE_MIGRATE.template.md - Template Migration
+
+> **⚠️ TEMPLATE FILE**: Platform-agnostic generator (templates/)
+> **Generated**: `instance/CLAUDE_MIGRATE.md` (migration state, gitignored)
+> **Agent**: Read `claude-mcp-installer/CLAUDE_README.md` first → Copy to instance/ → Execute workflow
 
 **Version**: 1.2.0 | **Updated**: 2025-10-26 | **Purpose**: One-time template initialization with MCP server support
+---
+
+## Pre-Migration: Schema Validation (EXECUTE FIRST)
+
+**CRITICAL**: Before executing any migration steps:
+
+1. **Verify CLAUDE_README.md exists** (schema rules)
+   ```bash
+   [ -f "claude-mcp-installer/CLAUDE_README.md" ] || echo "ERROR: Schema not found"
+   ```
+
+2. **Verify directory structure**
+   ```bash
+   ls claude-mcp-installer/templates/*.template.md
+   ls claude-mcp-installer/references/*.ref.md
+   # Should exist: templates/ and references/ subdirectories
+   ```
+
+3. **Detect migration state**
+   ```bash
+   # Check if already migrated
+   [ -d "claude-mcp-installer/instance" ] || \
+   [ -f "claude-mcp-installer/CLAUDE_INSTALL.md" ] && \
+   echo "Migration already complete" || echo "Fresh migration required"
+   ```
+
+4. **Create instance/ directory** (if fresh migration)
+   ```bash
+   mkdir -p claude-mcp-installer/instance
+   echo "✅ Created instance/ directory"
+   ```
+
+5. **Copy templates to instance/**
+   ```bash
+   # Strip .template suffix when copying
+   cp claude-mcp-installer/templates/CLAUDE_INSTALL.template.md \
+      claude-mcp-installer/instance/CLAUDE_INSTALL.md
+   cp claude-mcp-installer/templates/CLAUDE_MIGRATE.template.md \
+      claude-mcp-installer/instance/CLAUDE_MIGRATE.md
+   echo "✅ Created working copies in instance/"
+   ```
+
+6. **Setup .gitignore** (if git repo and .gitignore exists)
+   ```bash
+   if [ -d ".git" ] && [ -f ".gitignore" ]; then
+       cat >> .gitignore << 'GITEOF'
+# Generated Claude MCP Installer Documentation (platform-specific)
+claude-mcp-installer/instance/
+GITEOF
+       echo "✅ Updated .gitignore"
+   fi
+   ```
+
+**Validation Complete**: Proceed to populate instance/ files below
+
 
 ---
 
@@ -10,7 +69,38 @@ One-time migration: generic templates → project-specific docs
 
 **What**: Check-install-state → auto-detect → validate → prompt → replace → gen-v1.0.0 → record
 
-**MCP Support**: Detects MCP servers → validates credentials → configures Claude Code CLI
+**Role**: Migration wizard ONLY fills in documentation templates - does NOT install, configure, or modify the environment
+
+**Scope Boundaries**:
+- ✅ Agent READS project structure (files, configs, READMEs)
+- ✅ Agent DETECTS project metadata (dependencies, credentials, MCP servers)
+- ✅ Agent PROMPTS user for missing information
+- ✅ Agent WRITES to documentation files (CLAUDE_INSTALL.md, CLAUDE_README.md, CLAUDE_INSTALL_CHANGELOG.md)
+- ❌ Agent NEVER installs packages, modifies system config, or registers MCP servers
+- ❌ Agent NEVER runs `claude mcp add`, `pip install`, or any mutation commands
+
+**Responsibility Split**:
+- **CLAUDE_MIGRATE.md** (this document): Information gathering → template population
+- **CLAUDE_INSTALL.md** (installer document): User/agent follows to actually install/configure system
+
+**MCP Support**: Detects MCP servers → validates credentials → prepares installation instructions (actual configuration happens in CLAUDE_INSTALL.md)
+
+---
+
+## Migration vs Installation
+
+**This Document (CLAUDE_MIGRATE.md)**: ONE-TIME template initialization
+- Gathers project information through file analysis
+- Prompts user for configuration details
+- Detects existing installations (for documentation reference)
+- Fills in placeholders in CLAUDE_INSTALL.md
+- NO system changes, NO installations, NO configurations
+
+**Target Document (CLAUDE_INSTALL.md)**: REPEATABLE installation guide
+- Created/updated by migration wizard
+- Contains actual installation instructions
+- Agent or user follows this to modify system
+- Handles package installation, MCP server registration, environment setup
 
 ---
 
@@ -40,6 +130,8 @@ One-time migration: generic templates → project-specific docs
 
 **Purpose**: Detect existing MCP server installations before migration (wizard-style experience)
 
+**IMPORTANT - MIGRATION SCOPE**: This phase ONLY detects and records installation state for documentation purposes. NO installation, configuration, or system changes are made during this phase. Detected state is used to populate CLAUDE_INSTALL.md with appropriate guidance.
+
 **Detection Steps**:
 ```bash
 # Step 1: Check if project is MCP server
@@ -57,12 +149,14 @@ One-time migration: generic templates → project-specific docs
 
 **Installation States**:
 
-| State | Detection | Action |
-|-------|-----------|--------|
-| **Not Installed** | Server not in `claude mcp list` | Proceed to Phase 1 (fresh install) |
-| **User Scope** | In list, scope=user | Prompt: Update/Repair/Reinstall/Cancel |
-| **Project Scope** | In list, scope=local | Prompt: Migrate to user scope? |
-| **Broken** | In list, status=disconnected | Prompt: Repair installation? |
+| State | Detection | Documentation Action |
+|-------|-----------|---------------------|
+| **Not Installed** | Server not in `claude mcp list` | Record state → Proceed to Phase 1 (prepare fresh install docs) |
+| **User Scope** | In list, scope=user | Record state → Prompt for docs: Update/Repair/Reinstall/Cancel |
+| **Project Scope** | In list, scope=local | Record state → Prompt for docs: Migrate to user scope? |
+| **Broken** | In list, status=disconnected | Record state → Prompt for docs: Repair installation? |
+
+**Note**: During migration, these states are DETECTED and RECORDED to prepare appropriate installation documentation. No actual installation/configuration changes occur until user/agent follows CLAUDE_INSTALL.md.
 
 **User Prompts by State**:
 
@@ -488,14 +582,22 @@ source ~/.zshrc
 
 ### Phase 4: Update Templates
 
+**MIGRATION SCOPE**: This phase ONLY updates documentation files with detected/elicited information. No system changes occur during migration. The files created/updated here will serve as guides for actual installation.
+
 **Files Updated**:
-1. **CLAUDE_INSTALL.md**: Replace all placeholders
+1. **CLAUDE_INSTALL.md**: Replace all placeholders with project-specific values
    - About section: base-project, repo, customizations
    - Prerequisites: detected deps + validation
    - Options: detected install methods
    - **MCP Section** (if MCP detected): Generate Claude Code CLI integration section
 2. **CLAUDE_README.md**: Update examples to match project
 3. **CLAUDE_INSTALL_CHANGELOG.md**: Generate v1.0.0 entry
+
+**What This Phase Does NOT Do**:
+- ❌ Install packages or dependencies
+- ❌ Configure MCP servers
+- ❌ Modify system environment
+- ❌ Run `claude mcp add` or similar commands
 
 #### 4.1: MCP Section Generation (If MCP Detected)
 
@@ -680,6 +782,8 @@ claude mcp add-json --scope user {server-name} '{...new-credentials...}'
 
 ### Phase 5: Record Migration
 
+**IMPORTANT - MIGRATION COMPLETE**: Migration completion means documentation is ready - NOT that software is installed. User or agent must now follow CLAUDE_INSTALL.md to perform actual installation and system configuration.
+
 Append to this file:
 ```markdown
 ---
@@ -804,135 +908,3 @@ Agent auto:
 ---
 
 **Template**: v1.2.0 | **Created**: 2025-10-25 | **Updated**: 2025-10-26 | **Purpose**: Bridge generic → project-specific + MCP server support | **Maintained**: Claude Code Tooling
-
----
-
-## Migration Record
-
-**Completed**: 2025-10-26 23:05 UTC
-**By**: Claude Sonnet 4.5
-**Session**: claude-code-tooling
-**Mode**: Template Migration (Option 4 - Documentation Only)
-
-### Detected
-
-**Git**:
-- Origin: https://github.com/RoscoeTheDog/gptr-mcp.git
-- Upstream: https://github.com/assafelovic/gptr-mcp.git (base project)
-- Derived: YES (fork with customizations)
-
-**Project Structure**:
-- requirements.txt: gpt-researcher>=0.14.0, fastmcp>=2.8.0, python-dotenv, fastapi, uvicorn, pydantic, loguru, httpx, sseclient-py
-- Python: 3.11+ (required by gpt-researcher >=0.12.16)
-- Current system: Python 3.13.7
-
-**MCP Server Detection**:
-- Type: Python FastMCP server
-- Entrypoint: C:\Users\Admin\Documents\GitHub\gptr-mcp\server.py
-- Runtime: C:\python313\python.exe
-- Server Name: gptr-mcp
-
-**Credentials (from .env.example + README)**:
-- Required: OPENAI_API_KEY, TAVILY_API_KEY
-- Optional: ANTHROPIC_API_KEY, EMBEDDING, STRATEGIC_LLM, MAX_ITERATIONS, LOG_LEVEL, PORT
-
-**Existing Installation**:
-- Status: Already installed in Claude Code CLI (user scope, connected)
-- Configured: OPENAI_API_KEY, TAVILY_API_KEY, ANTHROPIC_API_KEY
-
-**Tools Available**:
-- deep_research: Deep web research (30s-5min)
-- quick_search: Fast web search (5-30s)
-- write_report: Generate research reports
-- get_research_sources: Retrieve research sources
-- get_research_context: Get full research context
-- Prompt: research_query
-
-### User-Provided
-
-**Customizations**: Added custom tools, modified configuration, enhanced documentation
-
-**Documentation**:
-- Official Docs: https://docs.gptr.dev
-- Website: https://gptr.dev
-- Issues: https://github.com/RoscoeTheDog/gptr-mcp/issues
-- Discussions: https://github.com/RoscoeTheDog/gptr-mcp/discussions
-
-**Installation Options**:
-- Selected: pip install (Python venv)
-- Validation: W11 [2025-10-26]
-
-**Platform Support**:
-- Windows 11: Validated [2025-10-26]
-
-### Files Updated
-
-CLAUDE_INSTALL.md - All placeholders replaced with project-specific values:
-- Project name: gptr-mcp
-- Repository URLs: origin + upstream
-- Python version: 3.11+
-- Prerequisites: Python, Git, API keys
-- Installation: pip + venv method
-- MCP Server Integration section: Fully configured with actual paths and credentials
-- Tools documentation: deep_research, quick_search, write_report, etc.
-- Support links: docs, issues, discussions
-
-CLAUDE_README.md - No changes (already project-agnostic policies)
-
-CLAUDE_MCP_TEMPLATE.md - Staged for reference (no changes needed)
-
-CLAUDE_MIGRATE.md - This migration record appended
-
-### MCP Integration Status
-
-**Phase 0**: Existing installation detected
-- Server: gptr-mcp
-- Scope: User (global)
-- Status: Connected
-- Action: Skipped credential re-elicitation (already working)
-
-**Phase 1-3**: Project detection and validation
-- MCP indicators: Confirmed (README, fastmcp imports, server.py)
-- Credentials detected: OPENAI_API_KEY, TAVILY_API_KEY (required), ANTHROPIC_API_KEY (optional)
-- Runtime/entrypoint: Detected and verified
-
-**Phase 4**: Template updates
-- All [PROJECT_NAME], [REPO_URL], [PYTHON_VERSION] placeholders replaced
-- MCP Server Integration section fully populated with actual values
-- Configuration commands updated with real paths
-
-**Phase 5**: Migration recorded
-
-### Next Steps
-
-1. Template Testing Complete: All updated templates staged successfully
-2. Review: Examine CLAUDE_INSTALL.md for accuracy
-3. Validate: Test installation flow with another MCP server project
-4. Document: Note any improvements for v1.3.0 template iteration
-5. Living Docs: System now active for gptr-mcp
-
-### Testing Notes
-
-**Purpose**: Test v1.2.0 template enhancements (MCP server integration support)
-
-**Key Features Tested**:
-- Phase 0: Installation state detection (found existing installation)
-- Installation wizard UI (Update/Repair/Reinstall/Cancel options)
-- Credential detection (README + .env.example + existing config)
-- Conventional naming recognition (API keys auto-masked)
-- Platform-aware configuration (Windows paths, backslashes)
-- Template placeholder replacement (comprehensive)
-
-**Observations**:
-- README-first credential detection worked efficiently
-- Existing installation detection prevents redundant elicitation
-- Wizard-style experience provides clear user options
-- Template placeholders comprehensively replaced (30+ instances)
-
-**Template Validation**: PASSED
-- v1.2.0 MCP enhancements fully functional
-- Ready for deployment to other MCP server projects
-
----
-
-**Status**: MIGRATION COMPLETED

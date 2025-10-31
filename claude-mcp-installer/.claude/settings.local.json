@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Admin/Documents/GitHub/claude-code-tooling/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

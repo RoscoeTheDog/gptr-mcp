@@ -1,17 +1,67 @@
 # Claude MCP Installer Templates - Agent Entrypoint
 
-**Version**: 1.2.0 | **Updated**: 2025-10-26 | **Purpose**: AI agent development entrypoint
+**Version**: 3.0.0 | **Updated**: 2025-10-30 | **Purpose**: AI agent development entrypoint
+
+---
+
+## Schema (EXECUTE FIRST)
+
+**CRITICAL**: Before processing ANY Claude documentation:
+
+1. **Read claude-mcp-installer/CLAUDE_README.md first** (this file) - establishes all rules
+2. **Detect migration state**:
+   ```bash
+   # Check if migration already run
+   [ -d "claude-mcp-installer/instance" ] || \
+   [ -f "claude-mcp-installer/CLAUDE_INSTALL.md" ] && echo "Migration complete" || echo "Fresh migration required"
+   ```
+3. **Setup .gitignore** (if not present in project root):
+   ```bash
+   cat >> .gitignore << 'EOF'
+   # Generated Claude MCP Installer Documentation (platform-specific)
+   claude-mcp-installer/instance/
+   EOF
+   ```
+
+**Directory Structure**:
+- `templates/` = Generators (copied to instance/ during migration)
+- `references/` = Static resources (read-only, never copied)
+- `instance/` = Generated files (mutable, platform-specific, gitignored)
+
+**Naming Convention**:
+- `.template.md` = Generator (will create mutable copy in instance/)
+- `.ref.md` = Static reference (read-only, used as context)
+- `.md` (no suffix) = Entrypoint or generated file
+
+**File Index**:
+```
+GIT-TRACKED (claude-mcp-installer/):          GENERATED (claude-mcp-installer/instance/):
+├── CLAUDE_README.md                          ├── CLAUDE_INSTALL.md
+├── templates/                                └── CLAUDE_MIGRATE.md
+│   ├── CLAUDE_INSTALL.template.md
+│   ├── CLAUDE_MIGRATE.template.md
+│   └── .gitignore.template
+└── references/
+    └── CLAUDE_MCP_INTEGRATION_SCHEMA.ref.md
+```
 
 ---
 
 ## System
 
-Living documentation templates (2-3 docs):
+Living documentation structure:
 ```
-CLAUDE_README.md (this) → agent entrypoint + policies
-CLAUDE_INSTALL.md → install guide template (user-facing)
-CLAUDE_INSTALL_CHANGELOG.md → version history template (no-git mode only)
-CLAUDE_MIGRATE.md → one-time migration wizard
+claude-mcp-installer/
+├── CLAUDE_README.md → agent entrypoint + policies
+├── templates/ → generators (create mutable copies in instance/)
+│   ├── CLAUDE_INSTALL.template.md
+│   ├── CLAUDE_MIGRATE.template.md
+│   └── .gitignore.template
+├── references/ → static resources (read-only, never copied)
+│   └── CLAUDE_MCP_INTEGRATION_SCHEMA.ref.md
+└── instance/ → generated files (mutable, platform-specific, gitignored)
+    ├── CLAUDE_INSTALL.md
+    └── CLAUDE_MIGRATE.md
 ```
 
 **Universal Application**: Templates work for any software project requiring environment setup/configuration.
@@ -20,43 +70,49 @@ CLAUDE_MIGRATE.md → one-time migration wizard
 
 ## Policies (MANDATORY)
 
-### P0: Git-First Version Control
+### P0: Directory-Based Separation + Template Immutability
 
-**RULE**: git-repo? → use-commits | no-git? → use-changelog-file
+**RULE**: templates/=generators | references/=static | instance/=mutable
 
 **Detection**:
 ```bash
-[ -d ".git" ] → git-mode | [ ! -d ".git" ] → changelog-mode
+# Check if migration run
+[ -d "claude-mcp-installer/instance" ] || [ -f "claude-mcp-installer/CLAUDE_INSTALL.md" ] → migration-complete
+[ ! -d "claude-mcp-installer/instance" ] → fresh-migration-required
 ```
 
-**Git Mode** (git repo exists):
+**Migration Workflow**:
 ```
-CLAUDE_INSTALL.md:updated → commit+push (IMMEDIATE)
-⊗ NEVER update CLAUDE_INSTALL_CHANGELOG.md file
-✓ Version history tracked via git commits
-```
-
-**Changelog Mode** (no git repo):
-```
-CLAUDE_INSTALL.md:updated → CLAUDE_INSTALL_CHANGELOG.md:add-entry + version++
-✓ Use CLAUDE_INSTALL_CHANGELOG.md as version history
+Schema validation → create instance/ → copy templates/*.template.md to instance/*.md (strip .template suffix) → populate placeholders → edit instance/ files
+⊗ NEVER edit templates/ files (immutable blueprints)
+⊗ NEVER copy references/ files (read-only context)
+✓ Generate instance/CLAUDE_INSTALL.md from templates/CLAUDE_INSTALL.template.md
+✓ Update instance/ files locally (platform-specific)
+✓ Commit templates/ or references/ changes only (if improving structure)
 ```
 
-**Commit Format (Git Mode)**:
+**File Roles**:
 ```
-docs(install): [Title] (vX.Y.Z)
+templates/*.template.md → Copied to instance/ during migration (stripped to .md)
+references/*.ref.md → Read as context, NEVER copied
+instance/*.md → Mutable, local-only, NEVER committed
+```
 
-- [change-1]
-- [change-2]
+**Commit Format (Template/Reference Updates Only)**:
+```
+docs(templates): [Title] (vX.Y.Z)
+
+- [template structure change]
+- [reference documentation update]
 - Version: [old] → [new] ([version-type])
 - Validation: [status-updates]
 ```
 
-**Rationale**: git=canonical-history, avoid-dual-systems, commits>changelog-files
+**Rationale**: directory-separation=clear-intent, templates=portable, instance=local
 
 ### P1: Update Trigger
 
-**MUST update CLAUDE_INSTALL.md when**:
+**MUST update instance/CLAUDE_INSTALL.md when**:
 ```
 code-change?(install|prereq|env|config|platform) → update-required
 ```
@@ -68,14 +124,7 @@ code-change?(install|prereq|env|config|platform) → update-required
 - config: config files, settings, special permissions
 - platform: OS support changes
 
-### P2: Changelog Strategy
-
-**Strategy**:
-```
-git-repo-exists? → commit-based (P0) | no-git? → file-based (CLAUDE_INSTALL_CHANGELOG.md)
-```
-
-### P3: Semantic Versioning
+### P2: Semantic Versioning
 
 **Version Logic**:
 ```
@@ -88,13 +137,13 @@ fixes|clarifies?(no-breaking) → PATCH (0.0.X)
 **MINOR Examples**: new-install-option, new-optional-dep, new-env-var(optional), enhanced-instructions
 **PATCH Examples**: typos, clarifications, validation-badge-updates, broken-link-fixes
 
-### P4: Installation Interaction
+### P3: Installation Interaction
 
 **RULE**: ALWAYS prompt for install choices, NEVER store preferences (no Graphiti memory)
 
 **Rationale**: install=infrequent, control>convenience
 
-### P5: Validation Tracking
+### P4: Validation Tracking
 
 **Badges**:
 - ✅ Validated: tested+working (platform+date)
@@ -105,9 +154,15 @@ fixes|clarifies?(no-breaking) → PATCH (0.0.X)
 
 **Update-When**: test-success | dep-version-change | user-issue | platform-change
 
-### P6: MCP Server Configuration Detection
+### P5: MCP Server Configuration Detection
 
 **RULE**: Detect MCP servers → check install state → elicit credentials → configure Claude Code CLI
+
+**Update Trigger**:
+```
+Policy added/changed? → MINOR version (new feature, backward-compatible)
+CLAUDE_INSTALL.md updated with confirmation prompts? → include in same commit
+```
 
 **Phase 0: Installation State Check** (Execute FIRST, before any detection):
 ```
@@ -243,7 +298,7 @@ Generate: claude mcp add-json --scope user {server-name} '{
 }'
 
 Execute → Verify: claude mcp get {server-name}
-Update: CLAUDE_INSTALL.md (add MCP Server Integration section)
+Update: instance/CLAUDE_INSTALL.md (add MCP Server Integration section)
 ```
 
 **Update Trigger**:
@@ -266,24 +321,14 @@ docs(install): Add Claude Code CLI integration (vX.Y.Z)
 
 ### Standard Cycle
 
-**Git Mode** (git repo exists):
+**Template Mode** (templates exist):
 ```
 code-change → assess-impact? → (no: done | yes: ↓)
-→ update(CLAUDE_INSTALL.md)
+→ update(instance/CLAUDE_INSTALL.md) - generated file, local only
 → determine-version-increment
 → update-validation-badges
-→ commit(CLAUDE_INSTALL.md + code) + push (IMMEDIATE)
-⊗ SKIP CLAUDE_INSTALL_CHANGELOG.md
-```
-
-**Changelog Mode** (no git):
-```
-code-change → assess-impact? → (no: done | yes: ↓)
-→ update(CLAUDE_INSTALL.md)
-→ determine-version-increment
-→ update(CLAUDE_INSTALL_CHANGELOG.md)
-→ update-validation-badges
-→ save-files
+→ commit templates only (if template structure improved)
+⊗ NEVER commit generated instance/CLAUDE_INSTALL.md
 ```
 
 ### Decision Matrix
@@ -303,60 +348,47 @@ tests-only                NO        -
 
 ---
 
-## Migration
-
-**Check**: `CLAUDE_MIGRATE.md` exists?
-
-### Option A: Auto-Migration (Recommended)
-```
-agent:read(CLAUDE_MIGRATE.md) → detect-project → prompt-validate → replace-placeholders → gen-v1.0.0 → update-record
-Time: 5-15min
-```
-
-### Option B: Manual
-```
-1. Replace placeholders ([PROJECT_NAME], [REPO_URL], [PYTHON_VERSION])
-2. Document current state (prereqs, options, validation)
-3. Init changelog (v1.0.0 entry)
-```
-
----
 
 ## Template Installation (Quick Start)
 
-### Step 1: Copy Templates
+### Step 1: Copy to Project Root
 ```bash
-cd /path/to/your-project
-cp /path/to/claude-code-tooling/claude-mcp-installer/* .
+cd /path/to/your-mcp-project
+cp -r /path/to/claude-code-tooling/claude-mcp-installer .
 ```
 
-**Files Copied**:
-- ✅ CLAUDE_README.md (this - agent entrypoint)
-- ✅ CLAUDE_INSTALL.md (install guide template)
-- ✅ CLAUDE_INSTALL_CHANGELOG.md (version history template)
-- ✅ CLAUDE_MIGRATE.md (migration wizard)
+**Directory Structure Created**:
+```
+your-mcp-project/
+└── claude-mcp-installer/
+    ├── CLAUDE_README.md
+    ├── templates/
+    │   ├── CLAUDE_INSTALL.template.md
+    │   ├── CLAUDE_MIGRATE.template.md
+    │   └── .gitignore.template
+    └── references/
+        └── CLAUDE_MCP_INTEGRATION_SCHEMA.ref.md
+```
 
 ### Step 2: Run Migration
 ```
-Agent: "I found CLAUDE_MIGRATE.md. Should I run the migration wizard?"
-You: "Yes"
-
+Agent: Point me to claude-mcp-installer/CLAUDE_README.md
 Agent will:
-1. Detect project details (repo URLs, dependencies, Python version, etc.)
-2. Show detected values for your validation
-3. Prompt for missing information
-4. Update all template placeholders
-5. Generate v1.0.0 changelog entry
-6. Append migration record to CLAUDE_MIGRATE.md
+1. Validate schema (check templates/, references/ exist)
+2. Detect if migration already run (check for instance/ directory)
+3. If fresh: Create instance/ directory
+4. Copy templates/*.template.md → instance/*.md (strip .template suffix)
+5. Populate placeholders with project-specific values
+6. Setup .gitignore to ignore instance/ directory
 
 Time: 5-15 minutes
-Result: All templates customized and ready to use
+Result: claude-mcp-installer/instance/ created with mutable, platform-specific docs
 ```
 
 ### Step 3: Start Development
-- **For AI agents**: Point to this file (CLAUDE_README.md) as development entrypoint
-- **For humans**: Read this file to understand documentation workflow
-- Living documentation system is now active!
+- **For AI agents**: Read claude-mcp-installer/CLAUDE_README.md as entrypoint
+- **For humans**: Follow claude-mcp-installer/instance/CLAUDE_INSTALL.md
+- **Git**: Commit claude-mcp-installer/ (templates/references), gitignore instance/
 
 ---
 
@@ -365,7 +397,7 @@ Result: All templates customized and ready to use
 ### Ex1: New API Key (MINOR) - Git Mode
 ```
 Change: Added ANTHROPIC_API_KEY
-Update: CLAUDE_INSTALL.md (prereq section + .env example)
+Update: instance/CLAUDE_INSTALL.md (prereq section + .env example)
 Version: 1.2.0 → 1.3.0
 Badge: ⚠️ until tested
 Commit: docs(install): Add Anthropic API support (v1.3.0)
@@ -379,7 +411,7 @@ Push: IMMEDIATE
 ### Ex2: Python Version Bump (MAJOR) - Git Mode
 ```
 Change: Python3.10+ → Python3.11+
-Update: CLAUDE_INSTALL.md (prereq + migration-note)
+Update: instance/CLAUDE_INSTALL.md (prereq + migration-note)
 Version: 1.9.5 → 2.0.0
 Badge: Update all platform validations
 Commit: docs(install): BREAKING - Python 3.11+ required (v2.0.0)
@@ -390,14 +422,12 @@ Commit: docs(install): BREAKING - Python 3.11+ required (v2.0.0)
 Push: IMMEDIATE
 ```
 
-### Ex3: Typo Fix (PATCH) - Changelog Mode (no git)
+### Ex3: Typo Fix (PATCH) - Template Mode
 ```
 Change: Fixed Neo4j connection string typo
-Update: CLAUDE_INSTALL.md (fix-typo)
+Update: instance/CLAUDE_INSTALL.md (local generated file)
 Version: 1.3.2 → 1.3.3
-Changelog: CLAUDE_INSTALL_CHANGELOG.md
-           [1.3.3] Fixed - Neo4j connection string example
-Save: Both files
+Action: Update local file only (not committed, platform-specific)
 ```
 
 ---
