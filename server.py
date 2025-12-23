@@ -11,6 +11,7 @@ import uuid
 import logging
 from typing import Dict, Any, Optional, List
 from dotenv import load_dotenv
+from fastapi.responses import JSONResponse
 from fastmcp import FastMCP
 from gpt_researcher import GPTResearcher
 
@@ -269,6 +270,9 @@ def research_query(topic: str, goal: str, report_format: str = "research_report"
     """
     return create_research_prompt(topic, goal, report_format)
 
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(request):
+    return JSONResponse({"status": "healthy", "service": "mcp-server"})
 
 def run_server():
     """Run the MCP server using FastMCP's built-in event loop handling."""
